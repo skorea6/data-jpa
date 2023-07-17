@@ -9,11 +9,11 @@
 ## Introuduce
 1. 순수한 JPA 기반 리포지토리
 - 기본 CRUD
-	저장
-	변경 변경감지 사용 삭제
-	전체 조회
-	단건 조회
-	카운트
+	- 저장
+	- 변경 변경감지 사용 삭제
+	- 전체 조회
+	- 단건 조회
+	- 카운트
 - 참고: JPA에서 수정은 변경감지 기능을 사용하면 된다.
 - 트랜잭션 안에서 엔티티를 조회한 다음에 데이터를 변경하면, 트랜잭션 종료 시점에 변경감지 기능이 작동
 해서 변경된 엔티티를 감지하고 UPDATE SQL을 실행한다
@@ -43,25 +43,29 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 ## 쿼리 메소드 기능
 - 메소드 이름으로 쿼리 생성
+  	```java
 	public interface MemberRepository extends JpaRepository<Member, Long> {
 	    List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 	}
-	- 스프링 데이터 JPA는 메소드 이름을 분석해서 JPQL을 생성하고 실행
+	```
+  	- 스프링 데이터 JPA는 메소드 이름을 분석해서 JPQL을 생성하고 실행
 	- 참고: 이 기능은 엔티티의 필드명이 변경되면 인터페이스에 정의한 메서드 이름도 꼭 함께 변경해야 한다. 그렇지 않으면 애플리케이션을 시작하는 시점에 오류가 발생한다. 이렇게 애플리케이션 로딩 시점에 오류를 인지할 수 있는 것이 스프링 데이터 JPA의 매우 큰 장점이다.
 
 - 메소드 이름으로 JPA NamedQuery 호출
 	- 파라미터가 증가하면 메서드 이름이 매우 지저분, 아래 방법 사용
 
 - @Query : 리파지토리 메소드에 쿼리 정의 파라미터 바인딩, 리파지토리 인터페이스에 쿼리 직접 정의
+  	```java
 	public interface MemberRepository extends JpaRepository<Member, Long> {
 		@Query("select m from Member m where m.username = :username and m.age = :age")
-	    List<Member> findUser(@Param("username") String username, @Param("age") int age);
+	    	List<Member> findUser(@Param("username") String username, @Param("age") int age);
 	}
+	```
 
 - 반환 타입
-	List<Member> findListByUsername(String username); // 컬렉션 (결과없음: 빈컬렉션 반환)
-    Member findMemberByUsername(String username); // 단건 (결과없음: null 반환, 2건 이상은 예외 발생)
-    Optional<Member> findOptionalByUsername(String username); // 단건 Optional
+	- List<Member> findListByUsername(String username); => 컬렉션 (결과없음: 빈컬렉션 반환)
+	- Member findMemberByUsername(String username); => 단건 (결과없음: null 반환, 2건 이상은 예외 발생)
+	- Optional<Member> findOptionalByUsername(String username); => 단건 Optional
     - 반환 타입 제한이 없다.
     - find .. By 에서 '..'에는 아무거나 와도 상관이 없다!
 
@@ -75,10 +79,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 		- List (자바 컬렉션): 추가 count 쿼리 없이 결과만 반환
 
 	- Page는 1부터 시작이 아니라 0부터 시작이다.
-		PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+		- PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
 
 	- count 쿼리 분리 가능
-		- count 쿼리가 join을 하지 않아야하는데 하는 경우 성능이 느려지기 때문에 사용하는 경우 아래처럼 써야함
+		- count 쿼리가 join을 하지 않아야하는데 하는 경우 성능이 느려지기 때문에 사용하는 경우 아래처럼 분리해서 써야함
 		- @Query(value = "select m from Member m", countQuery = "select count(m.username) from Member m")
 
 - 벌크성 수정 쿼리
@@ -91,7 +95,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 - @EntityGraph
 	- 연관된 엔티티들을 SQL 한번에 조회하는 방법
-	- member team은 지연로딩 관계이다. 따라서 다음과 같이 team의 데이터를 조회할 때 마다 쿼리가 실행된다. (N+1 문제 발생)
+	- member와 team은 지연로딩 관계이다. 따라서 team의 데이터를 조회할 때 마다 쿼리가 실행된다. (N+1 문제 발생)
 	- 사실상 페치 조인(FETCH JOIN)의 간편 버전 -> LEFT OUTER JOIN 사용
 
 
@@ -117,7 +121,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     @Override
     public List<Member> findMemberCustom() {
         return em.createQuery("select m from Member m").getResultList();
-	}
+    }
 }
 ```
 
